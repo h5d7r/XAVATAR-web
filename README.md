@@ -1,5 +1,4 @@
-# XAVATAR Maker
-
+# XAVATAR-web
 Browser-only image → `.xavatar` converter. No API, upload service, or backend.
 
 ## Run
