@@ -2,6 +2,9 @@
 
 A client-side web tool to create and convert to `.xavatar` directly in your browser.
 
+> [!NOTE]
+> This tool is provided for educational and customization purposes. Please ensure you have the right to use and modify the images you convert. The author is not responsible for any issues arising from the use of generated files on modified hardware.
+
 ## Run
 
 Requires Node.js 22.12+ or 24+.
@@ -40,7 +43,7 @@ Once you have generated your `.xavatar` file, transfer it to your console via FT
 ### Method 1: PSX-Xplorer
 
 1. Navigate to the file location using **[PS4-Xplorer 2.0](https://pkg-zone.com/details/LAPY20009)** (or **[PS5-Xplorer](https://pkg-zone.com/details/LAPY20011)**).
-2. Simply press the  button on the `.xavatar` file to install it.
+2. Simply press the <img src="https://raw.githubusercontent.com/bucanero/pkgi-ps3/master/data/CROSS.png" width="20" height="20" style="vertical-align: middle;"> button on the `.xavatar` file to install it.
 
 ### Method 2: Avatar Changer App
 
