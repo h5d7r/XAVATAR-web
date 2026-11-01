@@ -1,5 +1,6 @@
 # XAVATAR-web
-Browser-only image → `.xavatar` converter. No API, upload service, or backend.
+
+A client-side web tool to create and convert to `.xavatar` directly in your browser.
 
 ## Run
 
@@ -12,22 +13,53 @@ npm test
 npm run build
 ```
 
-Deploy the `dist` folder to any static host (GitHub Pages, Cloudflare Pages, etc.). Serve over HTTP/HTTPS, not file://. For subfolder hosting, build with `npm run build -- --base=./`.
+## Features
 
-## Output
+- **Batch Processing:** Convert up to 50 images at once.
+- **100% Local Processing:** Everything happens on your device. No images are sent or uploaded to any external website, server, or third-party service.
+- **Strict Privacy:** Nothing is recorded or stored.
+- **Zero Tracking:** Does not log your IP address, email, visit counts, or any other personal data. No external analytics are used.
 
-A standard ZIP with `.xavatar` extension, containing exactly 11 root-level files:
+## Usage
 
-- `avatar.png`, `picture.png` (440 × 440)
-- `avatar440.dds`, `picture440.dds`
-- `avatar260.dds`, `picture260.dds`
-- `avatar128.dds`, `picture128.dds`
-- `avatar64.dds`, `picture64.dds`
-- `online.json`
+1. Open the web page in your browser.
+2. Select your image ( supports up to 50 images ).
+3. Convert and download your ready-to-use .xavatar file(s).
 
-DDS uses DXT5 with no mipmaps. Default framing stretches to square, center crop and transparent contain are optional. EXIF orientation is applied. Multi-frame images use the first frame. Input is limited to 20 MiB and 40 megapixels (resolution checked after decoding). Unsupported or corrupt formats report errors. Not literally every image codec is supported by the WASM build; SVG external delegates are not included.
+## Where can I get avatars?
 
-The ~15 MB ImageMagick engine is bundled locally and runs inside a Web Worker to keep the interface responsive. Google Fonts requests contain no image data; system-font fallback works without them. Images are never sent to a server. There are no analytics or remote conversion calls.
+You can find high-quality avatars to convert at the following websites:
+
+* [PS Prices](https://psprices.com/region-us/collection/avatars)
+* [PSN Tools](https://www.psntools.com/avatars?page=1)
+
+## How to Apply the Avatar
+
+Once you have generated your `.xavatar` file, transfer it to your console via FTP or USB. You can apply it using one of the following methods:
+
+### Method 1: PSX-Xplorer
+
+1. Navigate to the file location using **[PS4-Xplorer 2.0](https://pkg-zone.com/details/LAPY20009)** (or **[PS5-Xplorer](https://pkg-zone.com/details/LAPY20011)**).
+2. Simply press the  button on the `.xavatar` file to install it.
+
+### Method 2: Avatar Changer App
+
+1. Move the `.xavatar` file to the following path on your console: `/data/AVATARS/`
+2. Open **[Avatar Changer](https://pkg-zone.com/details/LAPY20015)** (or **[Avatar Changer PS5](https://pkg-zone.com/details/LAPY20016)**).
+3. Select and apply the image from within the application.
+
+## Credits
+
+* **[LAPY](https://x.com/Lapy05575948):** For creating the `.xavatar` format.
+* **[m2k7m](https://github.com/m2k7m):** For creating this utility.
+
+## Contributing
+
+Pull requests are welcome.
+
+## License
+
+[MIT](LICENSE)
 
 ## Provenance and licensing
 
