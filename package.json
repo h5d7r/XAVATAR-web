@@ -1,0 +1,19 @@
+{
+	"name": "xavatar-web",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite --host 127.0.0.1",
+		"build": "vite build",
+		"test": "node --test tests/*.test.js"
+	},
+	"dependencies": {
+		"@imagemagick/magick-wasm": "^0.0.44",
+		"jszip": "^3.10.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.6.4",
+		"vite": "^8.3.5"
+	}
+}

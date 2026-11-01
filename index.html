@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Turn your image into a PlayStation .xavatar file. Private, free, and entirely in your browser.">
+  <meta name="theme-color" content="#07090e"><title>XAVATAR-web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="brand">XAVATAR <span>web</span><span class="version">v1.0</span></header>
+  <main>
+    <h1>Your image. Your avatar.</h1>
+    <p class="lede">Turn any supported image into a <code>.xavatar</code> file for your PS4 / PS5. All the right sizes, packaged in one click.</p>
+    <fieldset class="workflow" aria-label="Conversion steps"><span class="active" id="step1">01 <b>Upload</b></span><i></i><span id="step2">02 <b>Preview</b></span><i></i><span id="step3">03 <b>Convert</b></span></fieldset>
+    <div class="section-label"><span>01 / SOURCE IMAGES</span><span>20 MB / IMAGE</span></div>
+    <button class="file-drop" id="drop-zone" type="button" aria-label="Choose source images">
+      <svg class="file-drop-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M12 16V3m-5 5 5-5 5 5"/></svg>
+      <span class="file-drop-text">Drop your images here, or <strong>browse files</strong></span>
+      <span class="file-drop-hint">PNG, JPG, WebP, GIF, BMP, TIFF, HEIC & more<br>Up to 50 images · 200 MB total</span>
+      <span class="file-drop-selected" id="file-selected"></span>
+    </button>
+    <input type="file" id="file-input" multiple accept="image/*,.dds,.tga,.tif,.tiff,.heic,.avif,.psd">
+    <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+    <section id="preview-section" hidden>
+      <div class="section-label"><span>02 / AVATAR PREVIEWS</span><span id="image-count"></span></div>
+      <div id="image-list"></div>
+    </section>
+    <template id="image-template">
+      <article class="preview-card">
+        <button type="button" class="text-button remove-image" title="Remove image"><svg viewBox="0 0 640 640" aria-hidden="true" focusable="false"><path d="M232.7 69.9c4.4-13.1 16.6-21.9 30.4-21.9H377c13.8 0 26 8.8 30.4 21.9L416 96h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32s14.3-32 32-32h96zM128 208h384v304c0 35.3-28.7 64-64 64H192c-35.3 0-64-28.7-64-64zm88 64c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24"/></svg></button>
+        <div class="checker"><img alt="Avatar preview"></div>
+        <div class="preview-info"><strong class="image-name"></strong><span class="image-meta">Reading image…</span><label>IMAGE FIT<select><option value="stretch">Stretch to square</option><option value="cover">Center crop</option><option value="contain">Fit with transparent padding</option></select></label><span class="image-state" aria-live="polite">Loading…</span></div>
+      </article>
+    </template>
+    <button id="convert" type="button" disabled><span id="convert-label">Convert & download AVATARS.zip</span><span aria-hidden="true">↓</span></button>
+    <section id="progress-panel" aria-label="Batch conversion progress" hidden>
+      <div class="progress-heading"><span id="progress-label" role="status" aria-live="polite">Preparing…</span><strong id="progress-percent">0%</strong></div>
+      <progress id="progress" max="100" value="0" aria-label="Conversion progress"></progress>
+      <p id="progress-count"></p>
+    </section>
+    <a id="download" class="download-link" href="/" hidden>Download AVATARS.zip again ↗</a>
+    <p class="foot-hint privacy"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>100% in your browser. Your images never leave your device.</p>
+    <details><summary>What is a .xavatar file?</summary><p>A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. Designed for compatible custom-avatar tools on jailbroken PlayStation consoles; this page does not install avatars or modify your console.</p><p>Animated images use the first frame. Formats depend on ImageMagick support; unsupported or damaged files show an error. The conversion engine loads locally with the page.</p></details>
+    <footer><span>Made for your next avatar.</span><a href="https://github.com/m2k7m/PS4-AVATAR-MAKER" target="_blank" rel="noopener noreferrer">Based on PS4 Avatar Maker ↗</a></footer>
+  </main>
+  <script type="module" src="/src/app.js"></script>
+</body></html>
