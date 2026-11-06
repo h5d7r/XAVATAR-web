@@ -21,8 +21,8 @@ env:
   CI: "true"
 
 jobs:
-  build:
-    name: Test and build
+  format:
+    name: Formatting
     # Ignore pushes to feature branches; their pull requests run the same checks.
     if: github.event_name != 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
@@ -33,6 +33,7 @@ jobs:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
 
       - name: Set up Node.js 24 and npm cache
@@ -57,13 +58,95 @@ jobs:
 
       - name: Save the Biome changes as a patch
         id: biome-patch
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         continue-on-error: true
         run: |
           git diff --no-ext-diff --binary -- . ':(exclude).github/workflows/**' > "$RUNNER_TEMP/biome-fixes.patch"
           if [ -s "$RUNNER_TEMP/biome-fixes.patch" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Upload the Biome patch for write-back
+        id: biome-upload
+        if: steps.biome-patch.outputs.ready == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: biome-fixes-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/biome-fixes.patch
+          if-no-files-found: error
+          retention-days: 7
+
+  commit-biome:
+    name: Formatting / Commit and push fixes
+    needs: format
+    continue-on-error: true
+    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && needs.format.outputs.biome_artifact_id != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the revision being formatted
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+
+      - name: Download the Biome patch from formatting
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.format.outputs.biome_artifact_id }}
+          path: ${{ runner.temp }}/biome-writeback
+
+      - name: Commit and push the formatting fixes
+        run: |
+          remote_head=$(git ls-remote --exit-code origin "$GITHUB_REF")
+          read -r remote_sha _ <<< "$remote_head"
+          if [ "$remote_sha" != "$GITHUB_SHA" ]; then
+            echo "::warning::The branch has moved; skipping the Biome commit for this older run."
+            exit 0
+          fi
+
+          git apply --index "$RUNNER_TEMP/biome-writeback/biome-fixes.patch"
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "style: apply Biome fixes"
+          git push origin "HEAD:$GITHUB_REF"
+
+  build:
+    name: Test and build
+    needs: [format, commit-biome]
+    # A skipped or rejected optional write-back must not stop testing or building.
+    if: ${{ !cancelled() && needs.format.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Download the formatting changes
+        if: needs.format.outputs.biome_artifact_id != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.format.outputs.biome_artifact_id }}
+          path: ${{ runner.temp }}/biome-writeback
+
+      - name: Apply formatting changes before tests
+        if: needs.format.outputs.biome_artifact_id != ''
+        run: git apply "$RUNNER_TEMP/biome-writeback/biome-fixes.patch"
+
+      - name: Set up Node.js 24 and npm cache
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
 
       - name: Run converter and UI regression tests
         run: npm test
@@ -86,22 +169,10 @@ jobs:
           path: dist
           retention-days: 7
 
-      # Write-back is optional and must never block the Pages deployment.
-      - name: Upload the Biome patch for write-back
-        id: biome-upload
-        if: steps.biome-patch.outputs.ready == 'true'
-        continue-on-error: true
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: biome-fixes-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/biome-fixes.patch
-          if-no-files-found: error
-          retention-days: 7
-
   deploy:
     name: Publish GitHub Pages
     needs: build
-    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: ${{ !cancelled() && needs.build.result == 'success' && github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Only this job receives the minimum permissions needed for Pages + OIDC.
@@ -125,39 +196,3 @@ jobs:
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: printf '### XAVATAR-web\n\nWebsite deployed to %s\n' "$PAGE_URL" >> "$GITHUB_STEP_SUMMARY"
-
-  commit-biome:
-    name: Commit and push Biome fixes
-    needs: [build, deploy]
-    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && needs.build.outputs.biome_artifact_id != ''
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    steps:
-      - name: Check out the revision that was deployed
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: true
-
-      - name: Download the Biome patch from the build
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          artifact-ids: ${{ needs.build.outputs.biome_artifact_id }}
-          path: ${{ runner.temp }}/biome-writeback
-
-      - name: Commit and push the deployed fixes
-        run: |
-          remote_head=$(git ls-remote --exit-code origin "$GITHUB_REF")
-          read -r remote_sha _ <<< "$remote_head"
-          if [ "$remote_sha" != "$GITHUB_SHA" ]; then
-            echo "::warning::The branch has moved; skipping the Biome commit for this older deployment."
-            exit 0
-          fi
-
-          git apply --index "$RUNNER_TEMP/biome-writeback/biome-fixes.patch"
-          git -c user.name='github-actions[bot]' \
-            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-            commit -m "style: apply Biome fixes"
-          git push origin "HEAD:$GITHUB_REF"
