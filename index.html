@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Turn your image into a PlayStation .xavatar file. Private, free, and entirely in your browser.">
-  <meta name="theme-color" content="#07090e"><title>XAVATAR-web</title>
+  <title>XAVATAR-web</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header class="brand">XAVATAR <span>web</span><span class="version">v1.0</span></header>
+  <header class="brand">XAVATAR <span>web</span><span class="version">v1.1</span></header>
   <main>
     <h1>Your image. Your avatar.</h1>
     <p class="lede">Turn any supported image into a <code>.xavatar</code> file for your PS4 / PS5. All the right sizes, packaged in one click.</p>
@@ -42,8 +41,36 @@
     </section>
     <a id="download" class="download-link" href="/" hidden>Download AVATARS.zip again ↗</a>
     <p class="foot-hint privacy"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>100% in your browser. Your images never leave your device.</p>
-    <details><summary>What is a .xavatar file?</summary><p>A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. Designed for compatible custom-avatar tools on jailbroken PlayStation consoles; this page does not install avatars or modify your console.</p><p>Animated images use the first frame. Formats depend on ImageMagick support; unsupported or damaged files show an error. The conversion engine loads locally with the page.</p></details>
-    <footer><span>Made for your next avatar.</span><a href="https://github.com/m2k7m/PS4-AVATAR-MAKER" target="_blank" rel="noopener noreferrer">Based on PS4 Avatar Maker ↗</a></footer>
+    <details class="avatar-info">
+      <summary>What is a .xavatar file?</summary>
+      <p>A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. this page does not install avatars or modify your console.</p>
+      <p>Animated images use the first frame. Formats depend on ImageMagick support; unsupported or damaged files show an error. The conversion engine loads locally with the page.</p>
+    </details>
+    <details class="avatar-info">
+      <summary>Where can I get avatars?</summary>
+      <p>You can find high-quality avatars to convert at the following websites:</p>
+      <ul>
+        <li><a href="https://psprices.com/region-us/collection/avatars">PS Prices</a></li>
+        <li><a href="https://www.psntools.com/avatars?page=1">PSN Tools</a></li>
+      </ul>
+    </details>
+    <details class="avatar-info">
+      <summary>How to Apply the Avatar?</summary>
+      <p>Once you have generated your <code>.xavatar</code> file, transfer it to your console via FTP or USB. You can apply it using one of the following methods:</p>
+      <h3>Method 1: PSX-Xplorer</h3>
+      <ol>
+        <li>Navigate to the file location using <strong><a href="https://pkg-zone.com/details/LAPY20009">PS4-Xplorer 2.0</a></strong> (or <strong><a href="https://pkg-zone.com/details/LAPY20011">PS5-Xplorer</a></strong>).</li>
+        <li>Simply press the <img src="SVGs/PlayStation_button_X.svg" alt="X"> button on the <code>.xavatar</code> file to apply it.</li>
+        <li>Press <img src="SVGs/PlayStation_button_X.svg" alt="X"> + <img src="SVGs/PlayStation_button_L2.svg" alt="L2"> to apply it.</li>
+      </ol>
+      <h3>Method 2: Avatar Changer App</h3>
+      <ol>
+        <li>Move the <code>.xavatar</code> file to the following path on your console: <code>/data/AVATARS/</code></li>
+        <li>Open <strong><a href="https://pkg-zone.com/details/LAPY20015">Avatar Changer</a></strong> (or <strong><a href="https://pkg-zone.com/details/LAPY20016">Avatar Changer PS5</a></strong>).</li>
+        <li>Select and apply the image from within the application.</li>
+      </ol>
+    </details>
+    <footer><span>© 2026 <a href="https://github.com/m2k7m">m2k7m</a></span><a href="https://github.com/m2k7m/PS4-AVATAR-MAKER" target="_blank" rel="noopener noreferrer">Based on PS4 Avatar Maker ↗</a></footer>
   </main>
   <script type="module" src="/src/app.js"></script>
 </body></html>

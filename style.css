@@ -637,3 +637,13 @@ select:focus-visible {
 [hidden] {
 	display: none;
 }
+
+.avatar-info a { color: var(--indigo-light); }
+.avatar-info p, .avatar-info h3 { color: inherit; margin-top: 0.75rem; }
+.avatar-info ul, .avatar-info ol { margin-top: 0.5rem; padding-inline-start: 1.5rem; }
+
+.avatar-info ol img {
+	height: 1.25em;
+	width: auto;
+	vertical-align: middle;
+}

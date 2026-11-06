@@ -29,33 +29,6 @@ npm run build
 2. Select your image ( supports up to 50 images ).
 3. Convert and download your ready-to-use .xavatar file(s).
 
-## Where can I get avatars?
-
-You can find high-quality avatars to convert at the following websites:
-
-* [PS Prices](https://psprices.com/region-us/collection/avatars)
-* [PSN Tools](https://www.psntools.com/avatars?page=1)
-
-## How to Apply the Avatar
-
-Once you have generated your `.xavatar` file, transfer it to your console via FTP or USB. You can apply it using one of the following methods:
-
-### Method 1: PSX-Xplorer
-
-1. Navigate to the file location using **[PS4-Xplorer 2.0](https://pkg-zone.com/details/LAPY20009)** (or **[PS5-Xplorer](https://pkg-zone.com/details/LAPY20011)**).
-2. Simply press the <img src="https://raw.githubusercontent.com/bucanero/pkgi-ps3/master/data/CROSS.png" width="20" height="20" style="vertical-align: middle;"> button on the `.xavatar` file to install it.
-
-### Method 2: Avatar Changer App
-
-1. Move the `.xavatar` file to the following path on your console: `/data/AVATARS/`
-2. Open **[Avatar Changer](https://pkg-zone.com/details/LAPY20015)** (or **[Avatar Changer PS5](https://pkg-zone.com/details/LAPY20016)**).
-3. Select and apply the image from within the application.
-
-## Credits
-
-* **[LAPY](https://x.com/Lapy05575948):** For creating the `.xavatar` format.
-* **[m2k7m](https://github.com/m2k7m):** For creating this utility.
-
 ## Contributing
 
 Pull requests are welcome.
