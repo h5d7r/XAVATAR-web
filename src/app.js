@@ -277,7 +277,9 @@ $("convert").onclick = async () => {
 			if (card) cardError(card, new Error(error.message));
 		}
 		downloadUrl = URL.createObjectURL(
-			new Blob([result.bytes], { type: "application/zip" }),
+			new Blob([result.bytes], {
+				type: selected.length === 1 ? "application/octet-stream" : "application/zip",
+			}),
 		);
 		$("download").href = downloadUrl;
 		$("download").download = result.filename;
