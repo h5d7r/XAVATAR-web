@@ -773,3 +773,13 @@ select:focus-visible {
 	width: auto;
 	vertical-align: middle;
 }
+
+.url-source { margin-top: 1rem; }
+.url-source label { display: block; color: var(--text-2); font-size: 0.8rem; margin-bottom: 0.6rem; }
+.url-controls { display: flex; gap: 0.6rem; }
+#image-url { flex: 1; min-width: 0; padding: 0.8rem; background: var(--bg-1); border: 1px solid var(--border-focus); border-radius: var(--r-sm); color: var(--text-1); font: inherit; font-size: 0.8rem; }
+#load-url { padding: 0.8rem 1rem; border: 1px solid var(--border-focus); border-radius: var(--r-sm); background: var(--bg-2); color: var(--text-1); font: inherit; font-size: 0.8rem; cursor: pointer; }
+#image-url:focus-visible, #load-url:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+#image-url:disabled, #load-url:disabled { opacity: 0.5; cursor: not-allowed; }
+#url-hint { color: var(--text-2); font-size: 0.7rem; margin-top: 0.6rem; }
+@media (max-width: 480px) { .url-controls { flex-direction: column; } }
