@@ -1,6 +1,6 @@
-import { fetchImage } from "./remote.js";
 import { initLanguagePicker, isolate, t, translate } from "../i18n/index.js";
 import { ConversionError, MAX_BYTES, validateInput } from "./core.js";
+import { fetchImage } from "./remote.js";
 
 const $ = (id) => document.getElementById(id);
 const cards = [],
@@ -284,7 +284,8 @@ function renderProgress() {
 $("url-form").onsubmit = async (event) => {
 	event.preventDefault();
 	if (busy) return;
-	const remaining = MAX_TOTAL - cards.reduce((sum, card) => sum + card.file.size, 0);
+	const remaining =
+		MAX_TOTAL - cards.reduce((sum, card) => sum + card.file.size, 0);
 	if (cards.length >= MAX_FILES || remaining <= 0) {
 		message("upload.skipped", "error", { count: 1 });
 		return;
@@ -294,7 +295,10 @@ $("url-form").onsubmit = async (event) => {
 	message("url.loading");
 	let file;
 	try {
-		file = await fetchImage($("image-url").value, Math.min(MAX_BYTES, remaining));
+		file = await fetchImage(
+			$("image-url").value,
+			Math.min(MAX_BYTES, remaining),
+		);
 	} catch (error) {
 		message(error.translationKey ?? "url.failed", "error");
 	} finally {
