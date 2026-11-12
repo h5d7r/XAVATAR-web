@@ -1,4 +1,5 @@
-import { MAX_BYTES, validateInput } from "./core.js";
+import { initLanguagePicker, isolate, t, translate } from "../i18n/index.js";
+import { ConversionError, MAX_BYTES, validateInput } from "./core.js";
 
 const $ = (id) => document.getElementById(id);
 const cards = [],
@@ -8,13 +9,26 @@ let worker,
 	busy = false,
 	nextId = 0,
 	requestId = 0,
-	downloadUrl;
+	downloadUrl,
+	statusParts = [],
+	progress,
+	conversionResult,
+	conversionStopped = false;
 const MAX_FILES = 50,
 	MAX_TOTAL = 200 * 1024 * 1024;
-function message(text, type = "info") {
+function renderStatus() {
+	$("status").textContent = statusParts
+		.map(([key, values]) => t(key, values))
+		.join(" ");
+}
+function showStatus(parts, type) {
+	statusParts = parts;
 	$("status").hidden = false;
 	$("status").className = `status ${type}`;
-	$("status").textContent = text;
+	renderStatus();
+}
+function message(key, type = "info", values) {
+	showStatus([[key, values]], type);
 }
 function invalidateDownload() {
 	if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -22,22 +36,27 @@ function invalidateDownload() {
 	$("download").hidden = true;
 	$("step3").classList.remove("active");
 	$("progress-panel").hidden = true;
+	progress = undefined;
+	conversionResult = undefined;
+	conversionStopped = false;
 }
 function sync() {
 	const valid = cards.filter((card) => card.ready);
 	$("drop-zone").disabled = busy;
 	$("convert").disabled = busy || !valid.length;
 	$("convert-label").textContent = busy
-		? "Processing your images…"
+		? t("convert.busy")
 		: valid.length > 1
-			? `Convert & download AVATARS.zip (${valid.length})`
-			: "Convert & download .xavatar";
+			? t("convert.batch", {
+					name: isolate("AVATARS.zip"),
+					count: valid.length,
+				})
+			: t("convert.single", { extension: isolate(".xavatar") });
 	$("file-selected").textContent = cards.length
-		? `${cards.length} image${cards.length === 1 ? "" : "s"} selected — add more anytime`
+		? t("upload.selected", { count: cards.length })
 		: "";
 	$("preview-section").hidden = !cards.length;
-	$("image-count").textContent =
-		`${cards.length} IMAGE${cards.length === 1 ? "" : "S"}`;
+	$("image-count").textContent = t("preview.count", { count: cards.length });
 	$("step2").classList.toggle("active", !!valid.length);
 	for (const card of cards) {
 		card.element.querySelector("button").disabled = busy;
@@ -58,15 +77,10 @@ function getWorker() {
 		}
 		clearTimeout(job.timer);
 		pending.delete(data.id);
-		if (data.type === "error") job.reject(new Error(data.error));
+		if (data.type === "error") job.reject(data.error);
 		else job.resolve(data.result);
 	};
-	worker.onerror = () =>
-		stopWorker(
-			new Error(
-				"The conversion engine stopped. Please try again with fewer or smaller images.",
-			),
-		);
+	worker.onerror = () => stopWorker(new ConversionError("errors.stopped"));
 	return worker;
 }
 function stopWorker(error) {
@@ -81,8 +95,7 @@ function stopWorker(error) {
 function request(type, data, progress) {
 	return new Promise((resolve, reject) => {
 		const id = ++requestId;
-		const fail = () =>
-			stopWorker(new Error("Processing timed out. Please try smaller images."));
+		const fail = () => stopWorker(new ConversionError("errors.timeout"));
 		const job = { resolve, reject, timer: setTimeout(fail, 120000) };
 		job.progress = (value) => {
 			clearTimeout(job.timer);
@@ -101,10 +114,24 @@ function request(type, data, progress) {
 }
 function cardError(card, error) {
 	card.ready = false;
+	card.error = error.translationKey ?? "errors.unsupported";
 	card.element.classList.add("has-error");
-	card.element.querySelector(".image-state").textContent = error.message;
-	card.element.querySelector(".image-state").className =
-		"image-state error-text";
+	card.element.querySelector(".image-state").classList.add("error-text");
+	renderCard(card);
+}
+function renderCard(card) {
+	const { element } = card;
+	const name = isolate(card.name);
+	element.querySelector("img").alt = t("preview.alt", { name });
+	element
+		.querySelector("button")
+		.setAttribute("aria-label", t("preview.remove", { name }));
+	element.querySelector(".image-meta").textContent = card.metadata
+		? t("preview.metadata", card.metadata)
+		: t("preview.reading");
+	element.querySelector(".image-state").textContent = t(
+		card.error ?? (card.ready ? "preview.ready" : "preview.loading"),
+	);
 }
 async function preview(card) {
 	const bytes = new Uint8Array(await card.file.arrayBuffer());
@@ -115,12 +142,16 @@ async function preview(card) {
 		new Blob([result.bytes], { type: "image/png" }),
 	);
 	card.element.querySelector("img").src = card.url;
-	card.element.querySelector(".image-meta").textContent =
-		`${result.width} × ${result.height} · ${(card.file.size / 1024 / 1024).toFixed(2)} MB`;
-	card.element.querySelector(".image-state").textContent = "Ready";
-	card.element.querySelector(".image-state").className = "image-state";
+	card.metadata = {
+		width: result.width,
+		height: result.height,
+		size: Number((card.file.size / 1024 / 1024).toFixed(2)),
+	};
+	card.error = undefined;
+	card.element.querySelector(".image-state").classList.remove("error-text");
 	card.element.classList.remove("has-error");
 	card.ready = true;
+	renderCard(card);
 }
 function addCard(file) {
 	const element = template.content.firstElementChild.cloneNode(true);
@@ -132,11 +163,9 @@ function addCard(file) {
 		element,
 		ready: false,
 	};
-	element.querySelector(".image-name").textContent = file.name;
-	element.querySelector("img").alt = `Avatar preview for ${file.name}`;
-	element
-		.querySelector("button")
-		.setAttribute("aria-label", `Remove ${file.name}`);
+	element.querySelector(".image-name bdi").textContent = file.name;
+	translate(element);
+	renderCard(card);
 	const select = element.querySelector("select");
 	select.id = `framing-${card.id}`;
 	element.querySelector("label").htmlFor = select.id;
@@ -149,10 +178,9 @@ function addCard(file) {
 		sync();
 		if (!cards.length) $("status").hidden = true;
 		else
-			message(
-				`${cards.filter((item) => item.ready).length} image(s) ready.`,
-				"ok",
-			);
+			message("upload.ready", "ok", {
+				count: cards.filter((item) => item.ready).length,
+			});
 	};
 	select.onchange = async () => {
 		if (busy) return;
@@ -162,13 +190,10 @@ function addCard(file) {
 		sync();
 		try {
 			await preview(card);
-			message("Preview updated.", "ok");
+			message("preview.updated", "ok");
 		} catch (error) {
 			cardError(card, error);
-			message(
-				"Could not update this image. Remove it and add it again.",
-				"error",
-			);
+			message("preview.updateFailed", "error");
 		} finally {
 			busy = false;
 			sync();
@@ -194,9 +219,13 @@ async function selectFiles(fileList) {
 			total += file.size;
 			const card = addCard(file);
 			sync();
-			message(`Reading image ${index + 1} of ${fileList.length}: ${file.name}`);
+			message("upload.reading", "info", {
+				current: index + 1,
+				total: fileList.length,
+				name: isolate(file.name),
+			});
 			try {
-				if (file.size > MAX_BYTES) throw new Error("File exceeds 20 MB.");
+				if (file.size > MAX_BYTES) throw new ConversionError("errors.tooLarge");
 				await preview(card);
 			} catch (error) {
 				cardError(card, error);
@@ -204,25 +233,50 @@ async function selectFiles(fileList) {
 		}
 		const ready = cards.filter((card) => card.ready).length,
 			failed = cards.length - ready;
-		message(
-			`${ready} image(s) ready.${failed ? ` ${failed} could not be read; remove the marked cards.` : ""}${rejected ? ` ${rejected} skipped: limit is 50 files / 200 MB total.` : ""}`,
-			failed || rejected ? "error" : "ok",
-		);
+		const parts = [["upload.ready", { count: ready }]];
+		if (failed) parts.push(["upload.failed", { count: failed }]);
+		if (rejected) parts.push(["upload.skipped", { count: rejected }]);
+		showStatus(parts, failed || rejected ? "error" : "ok");
 	} finally {
 		busy = false;
 		sync();
 	}
 }
 function updateProgress(value) {
-	const percent = Math.max(0, Math.min(100, Math.floor(value.percent)));
+	progress = value;
+	renderProgress();
+}
+function renderProgress() {
+	if (!progress) return;
+	const percent = conversionResult
+		? 100
+		: Math.max(0, Math.min(100, Math.floor(progress.percent)));
 	$("progress").value = percent;
-	$("progress-percent").textContent = `${percent}%`;
-	$("progress-label").textContent =
-		value.phase === "zip"
-			? "Packing AVATARS.zip…"
-			: `Converting ${value.current || Math.min(value.completed + 1, value.total)} / ${value.total}: ${value.name}`;
-	$("progress-count").textContent =
-		`${value.completed} / ${value.total} images processed`;
+	$("progress-percent").textContent = t("progress.percent", { percent });
+	if (conversionResult) {
+		const { filename, count, failed } = conversionResult;
+		const name = isolate(filename);
+		const summary = [t("progress.converted", { count })];
+		if (failed) summary.push(t("progress.failed", { count: failed }));
+		$("download").textContent = t("download.again", { name });
+		$("progress-label").textContent = t("progress.ready", { name });
+		$("progress-count").textContent = summary.join(" ");
+		return;
+	}
+	const { phase, completed, total, current, name } = progress;
+	$("progress-label").textContent = conversionStopped
+		? t("progress.stopped")
+		: phase === "zip"
+			? t("progress.packing", { name: isolate(name) })
+			: t("progress.converting", {
+					current: current ?? Math.min(completed + 1, total),
+					total,
+					name: isolate(name),
+				});
+	$("progress-count").textContent = t("progress.processed", {
+		completed,
+		total,
+	});
 }
 $("drop-zone").onclick = () => {
 	$("file-input").value = "";
@@ -258,7 +312,7 @@ $("convert").onclick = async () => {
 		name: selected[0].name,
 		phase: "convert",
 	});
-	message("Converting your images locally. Please keep this tab open.");
+	message("convert.local");
 	try {
 		const result = await request(
 			"batch",
@@ -274,7 +328,7 @@ $("convert").onclick = async () => {
 		);
 		for (const error of result.errors) {
 			const card = cards.find((card) => card.id === error.id);
-			if (card) cardError(card, new Error(error.message));
+			if (card) cardError(card, error);
 		}
 		downloadUrl = URL.createObjectURL(
 			new Blob([result.bytes], {
@@ -287,25 +341,25 @@ $("convert").onclick = async () => {
 
 		$("download").href = downloadUrl;
 		$("download").download = result.filename;
-		$("download").textContent = `Download ${result.filename} again ↗`;
+		conversionResult = {
+			filename: result.filename,
+			count: result.count,
+			failed: result.errors.length,
+		};
+		renderProgress();
 		$("download").hidden = false;
 		$("download").click();
 		$("step3").classList.add("active");
-		$("progress").value = 100;
-		$("progress-percent").textContent = "100%";
-		$("progress-label").textContent =
-			`${result.filename} ready — ${result.count} avatar(s)`;
-		$("progress-count").textContent =
-			`${result.count} converted${result.errors.length ? ` · ${result.errors.length} failed (marked below)` : ""}`;
-		message(
-			selected.length === 1
-				? `Downloaded ${result.filename}.`
-				: `Downloaded ${result.filename} with ${result.count} .xavatar file(s).${result.errors.length ? ` ${result.errors.length} failed; see marked cards.` : ""}`,
-			result.errors.length ? "error" : "ok",
-		);
+		const parts = [["download.done", { name: isolate(result.filename) }]];
+		if (selected.length > 1)
+			parts.push(["progress.converted", { count: result.count }]);
+		if (result.errors.length)
+			parts.push(["progress.failed", { count: result.errors.length }]);
+		showStatus(parts, result.errors.length ? "error" : "ok");
 	} catch (error) {
-		message(error.message, "error");
-		$("progress-label").textContent = "Conversion stopped — try again.";
+		message(error.translationKey ?? "errors.unsupported", "error");
+		conversionStopped = true;
+		renderProgress();
 	} finally {
 		busy = false;
 		sync();
@@ -315,4 +369,9 @@ window.addEventListener("pagehide", () => {
 	for (const card of cards) if (card.url) URL.revokeObjectURL(card.url);
 	if (downloadUrl) URL.revokeObjectURL(downloadUrl);
 });
-sync();
+initLanguagePicker(() => {
+	sync();
+	for (const card of cards) renderCard(card);
+	if (!$("status").hidden) renderStatus();
+	if (!$("progress-panel").hidden) renderProgress();
+});

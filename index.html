@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>XAVATAR-web</title>
@@ -8,69 +8,83 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header class="brand">XAVATAR <span>web</span><span class="version">v1.1</span></header>
+  <header class="site-header">
+    <div class="brand" dir="ltr">XAVATAR <span>web</span><span class="version">v2.0</span></div>
+    <div class="language-picker" hidden>
+      <button id="language-toggle" type="button" aria-expanded="false" aria-controls="language-options">
+        <img class="language-flag" alt=""><span id="current-language"></span><span class="language-chevron" aria-hidden="true"></span>
+      </button>
+      <div id="language-options" class="language-options" hidden>
+        <ul id="language-list"></ul>
+        <a class="language-contribute" href="https://github.com/m2k7m/XAVATAR-web/tree/main/i18n#add-a-language" lang="en" dir="ltr">Add your language <span class="external-arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </header>
   <main>
-    <h1>Your image. Your avatar.</h1>
-    <p class="lede">Turn any supported image into a <code>.xavatar</code> file for your PS4 / PS5. All the right sizes, packaged in one click.</p>
-    <fieldset class="workflow" aria-label="Conversion steps"><span class="active" id="step1">01 <b>Upload</b></span><i></i><span id="step2">02 <b>Preview</b></span><i></i><span id="step3">03 <b>Convert</b></span></fieldset>
-    <div class="section-label"><span>01 / SOURCE IMAGES</span><span>20 MB / IMAGE</span></div>
-    <button class="file-drop" id="drop-zone" type="button" aria-label="Choose source images">
+    <h1 data-i18n="intro.title">Your image. Your avatar.</h1>
+    <p class="lede" data-i18n="intro.description">Turn any supported image into a <code data-i18n-slot="extension">.xavatar</code> file for your PS4 / PS5. All the right sizes, packaged in one click.</p>
+    <fieldset class="workflow" aria-label="Conversion steps" data-i18n-aria-label="steps.label"><span class="active" id="step1">01 <b data-i18n="steps.upload">Upload</b></span><i></i><span id="step2">02 <b data-i18n="steps.preview">Preview</b></span><i></i><span id="step3">03 <b data-i18n="steps.convert">Convert</b></span></fieldset>
+    <div class="section-label"><span data-i18n="upload.heading">01 / SOURCE IMAGES</span><span data-i18n="upload.limit">20 MB / IMAGE</span></div>
+    <button class="file-drop" id="drop-zone" type="button" aria-label="Choose source images" data-i18n-aria-label="upload.choose">
       <svg class="file-drop-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M12 16V3m-5 5 5-5 5 5"/></svg>
-      <span class="file-drop-text">Drop your images here, or <strong>browse files</strong></span>
-      <span class="file-drop-hint">PNG, JPG, WebP, GIF, BMP, TIFF, HEIC & more<br>Up to 50 images · 200 MB total</span>
+      <span class="file-drop-text" data-i18n="upload.drop">Drop your images here, or <strong data-i18n-slot="browse" data-i18n="upload.browse">browse files</strong></span>
+      <span class="file-drop-hint"><span data-i18n="upload.formats">PNG, JPG, WebP, GIF, BMP, TIFF, HEIC & more</span><br><span data-i18n="upload.totalLimit">Up to 50 images · 200 MB total</span></span>
       <span class="file-drop-selected" id="file-selected"></span>
     </button>
     <input type="file" id="file-input" multiple accept="image/*,.dds,.tga,.tif,.tiff,.heic,.avif,.psd">
     <div id="status" class="status" role="status" aria-live="polite" hidden></div>
     <section id="preview-section" hidden>
-      <div class="section-label"><span>02 / AVATAR PREVIEWS</span><span id="image-count"></span></div>
+      <div class="section-label"><span data-i18n="preview.heading">02 / AVATAR PREVIEWS</span><span id="image-count"></span></div>
       <div id="image-list"></div>
     </section>
     <template id="image-template">
       <article class="preview-card">
-        <button type="button" class="text-button remove-image" title="Remove image"><svg viewBox="0 0 640 640" aria-hidden="true" focusable="false"><path d="M232.7 69.9c4.4-13.1 16.6-21.9 30.4-21.9H377c13.8 0 26 8.8 30.4 21.9L416 96h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32s14.3-32 32-32h96zM128 208h384v304c0 35.3-28.7 64-64 64H192c-35.3 0-64-28.7-64-64zm88 64c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24"/></svg></button>
-        <div class="checker"><img alt="Avatar preview"></div>
-        <div class="preview-info"><strong class="image-name"></strong><span class="image-meta">Reading image…</span><label>IMAGE FIT<select><option value="stretch">Stretch to square</option><option value="cover">Center crop</option><option value="contain">Fit with transparent padding</option></select></label><span class="image-state" aria-live="polite">Loading…</span></div>
+        <button type="button" class="text-button remove-image" title="Remove image" data-i18n-title="preview.removeTitle"><svg viewBox="0 0 640 640" aria-hidden="true" focusable="false"><path d="M232.7 69.9c4.4-13.1 16.6-21.9 30.4-21.9H377c13.8 0 26 8.8 30.4 21.9L416 96h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32s14.3-32 32-32h96zM128 208h384v304c0 35.3-28.7 64-64 64H192c-35.3 0-64-28.7-64-64zm88 64c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24m104 0c-13.3 0-24 10.7-24 24v192c0 13.3 10.7 24 24 24s24-10.7 24-24V296c0-13.3-10.7-24-24-24"/></svg></button>
+        <div class="checker"><img alt=""></div>
+        <div class="preview-info"><strong class="image-name"><bdi></bdi></strong><span class="image-meta"></span><label><span data-i18n="preview.fit">IMAGE FIT</span><select><option value="stretch" data-i18n="preview.stretch">Stretch to square</option><option value="cover" data-i18n="preview.cover">Center crop</option><option value="contain" data-i18n="preview.contain">Fit with transparent padding</option></select></label><span class="image-state" aria-live="polite"></span></div>
       </article>
     </template>
-    <button id="convert" type="button" disabled><span id="convert-label">Convert & download AVATARS.zip</span><span aria-hidden="true">↓</span></button>
-    <section id="progress-panel" aria-label="Batch conversion progress" hidden>
-      <div class="progress-heading"><span id="progress-label" role="status" aria-live="polite">Preparing…</span><strong id="progress-percent">0%</strong></div>
-      <progress id="progress" max="100" value="0" aria-label="Conversion progress"></progress>
+    <button id="convert" type="button" disabled><span id="convert-label"></span><span aria-hidden="true">↓</span></button>
+    <section id="progress-panel" aria-label="Batch conversion progress" data-i18n-aria-label="progress.panel" hidden>
+      <div class="progress-heading"><span id="progress-label" role="status" aria-live="polite"></span><strong id="progress-percent">0%</strong></div>
+      <progress id="progress" max="100" value="0" aria-label="Conversion progress" data-i18n-aria-label="progress.label"></progress>
       <p id="progress-count"></p>
     </section>
-    <a id="download" class="download-link" href="/" hidden>Download AVATARS.zip again ↗</a>
-    <p class="foot-hint privacy"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>100% in your browser. Your images never leave your device.</p>
+    <a id="download" class="download-link" href="/" hidden>Download again</a>
+    <p class="foot-hint privacy" data-i18n="about.privacy"><svg data-i18n-slot="lock" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>100% in your browser. Your images never leave your device.</p>
     <details class="avatar-info">
-      <summary>What is a .xavatar file?</summary>
-      <p>A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. this page does not install avatars or modify your console.</p>
-      <p>Animated images use the first frame. Formats depend on ImageMagick support; unsupported or damaged files show an error. The conversion engine loads locally with the page.</p>
+      <summary data-i18n="about.format">What is a .xavatar file?</summary>
+      <p data-i18n="about.formatDetails">A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. this page does not install avatars or modify your console.</p>
+      <p data-i18n="about.formats">Animated images use the first frame. Formats depend on ImageMagick support; unsupported or damaged files show an error. The conversion engine loads locally with the page.</p>
     </details>
     <details class="avatar-info">
-      <summary>Where can I get avatars?</summary>
-      <p>You can find high-quality avatars to convert at the following websites:</p>
+      <summary data-i18n="about.sources">Where can I get avatars?</summary>
+      <p data-i18n="about.sourceDetails">You can find high-quality avatars to convert at the following websites:</p>
       <ul>
         <li><a href="https://psprices.com/region-us/collection/avatars">PS Prices</a></li>
         <li><a href="https://www.psntools.com/avatars?page=1">PSN Tools</a></li>
       </ul>
     </details>
     <details class="avatar-info">
-      <summary>How to Apply the Avatar?</summary>
-      <p>Once you have generated your <code>.xavatar</code> file, transfer it to your console via FTP or USB. You can apply it using one of the following methods:</p>
-      <h3>Method 1: PSX-Xplorer</h3>
+      <summary data-i18n="about.apply">How to Apply the Avatar?</summary>
+      <p data-i18n="about.transfer">Once you have generated your <code data-i18n-slot="extension">.xavatar</code> file, transfer it to your console via FTP or USB. You can apply it using one of the following methods:</p>
+      <h3 data-i18n="about.explorer">Method 1: PSX-Xplorer</h3>
       <ol>
-        <li>Navigate to the file location using <strong><a href="https://pkg-zone.com/details/LAPY20009">PS4-Xplorer 2.0</a></strong> (or <strong><a href="https://pkg-zone.com/details/LAPY20011">PS5-Xplorer</a></strong>).</li>
-        <li>Simply press the <img src="SVGs/PlayStation_button_X.svg" alt="X"> button on the <code>.xavatar</code> file to apply it.</li>
-        <li>Press <img src="SVGs/PlayStation_button_X.svg" alt="X"> + <img src="SVGs/PlayStation_button_L2.svg" alt="L2"> to apply it.</li>
+        <li data-i18n="about.explorerOpen">Navigate to the file location using <strong data-i18n-slot="ps4"><a href="https://pkg-zone.com/details/LAPY20009">PS4-Xplorer 2.0</a></strong> (or <strong data-i18n-slot="ps5"><a href="https://pkg-zone.com/details/LAPY20011">PS5-Xplorer</a></strong>).</li>
+        <li data-i18n="about.explorerApply">Simply press the <img data-i18n-slot="cross" src="SVGs/PlayStation_button_X.svg" alt="X"> button on the <code data-i18n-slot="extension">.xavatar</code> file to apply it.</li>
+        <li data-i18n="about.explorerShortcut">Press <img data-i18n-slot="cross" src="SVGs/PlayStation_button_X.svg" alt="X"> + <img data-i18n-slot="l2" src="SVGs/PlayStation_button_L2.svg" alt="L2"> to apply it.</li>
       </ol>
-      <h3>Method 2: Avatar Changer App</h3>
+      <h3 data-i18n="about.changer">Method 2: Avatar Changer App</h3>
       <ol>
-        <li>Move the <code>.xavatar</code> file to the following path on your console: <code>/data/AVATARS/</code></li>
-        <li>Open <strong><a href="https://pkg-zone.com/details/LAPY20015">Avatar Changer</a></strong> (or <strong><a href="https://pkg-zone.com/details/LAPY20016">Avatar Changer PS5</a></strong>).</li>
-        <li>Select and apply the image from within the application.</li>
+        <li data-i18n="about.changerMove">Move the <code data-i18n-slot="extension">.xavatar</code> file to the following path on your console: <code data-i18n-slot="path">/data/AVATARS/</code></li>
+        <li data-i18n="about.changerOpen">Open <strong data-i18n-slot="ps4"><a href="https://pkg-zone.com/details/LAPY20015">Avatar Changer</a></strong> (or <strong data-i18n-slot="ps5"><a href="https://pkg-zone.com/details/LAPY20016">Avatar Changer PS5</a></strong>).</li>
+        <li data-i18n="about.changerApply">Select and apply the image from within the application.</li>
       </ol>
     </details>
-    <footer><span>© 2026 <a href="https://github.com/m2k7m">m2k7m</a></span><a href="https://github.com/m2k7m/PS4-AVATAR-MAKER" target="_blank" rel="noopener noreferrer">Based on PS4 Avatar Maker ↗</a></footer>
+    <footer lang="en" dir="ltr">
+      <span>© 2026 <a href="https://github.com/m2k7m">m2k7m</a></span>
+      <a href="https://github.com/m2k7m/PS4-AVATAR-MAKER" target="_blank" rel="noopener noreferrer">Based on PS4 Avatar Maker <span class="external-arrow" aria-hidden="true">↗</span></a>
+    </footer>
   </main>
   <script type="module" src="/src/app.js"></script>
 </body></html>

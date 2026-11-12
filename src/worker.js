@@ -1,7 +1,7 @@
 import { initializeImageMagick } from "@imagemagick/magick-wasm";
 import wasmUrl from "@imagemagick/magick-wasm/magick.wasm?url";
 import { createAvatarDownload } from "./batch.js";
-import { createXavatar, renderPreview } from "./core.js";
+import { ConversionError, createXavatar, renderPreview } from "./core.js";
 import onlineJson from "./online.json?raw";
 
 let initialized;
@@ -16,9 +16,12 @@ async function ready() {
 				return r.arrayBuffer();
 			})
 			.then((buffer) => initializeImageMagick(new Uint8Array(buffer)))
-			.catch((error) => {
+			.catch(() => {
 				initialized = null;
-				throw error;
+				throw new ConversionError(
+					"errors.engine",
+					"Unable to load conversion engine. Reload the page and try again.",
+				);
 			});
 	return initialized;
 }
@@ -45,7 +48,7 @@ self.onmessage = async ({ data: { id, type, bytes, fit, items } }) => {
 		self.postMessage({
 			id,
 			type: "error",
-			error: error.message || "Unsupported or damaged image.",
+			error: { translationKey: error.translationKey },
 		});
 	}
 };

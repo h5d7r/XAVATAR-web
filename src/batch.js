@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { safeName } from "./core.js";
+import { ConversionError, safeName } from "./core.js";
 
 export function uniqueAvatarNames(names) {
 	const used = new Set();
@@ -40,7 +40,8 @@ export async function createAvatarDownload(items, encode, progress = () => {}) {
 	return { bytes, filename: safeName(item.name), count: 1, errors: [] };
 }
 export async function createAvatarBatch(items, encode, progress = () => {}) {
-	if (!items.length) throw new Error("Choose at least one image.");
+	if (!items.length)
+		throw new ConversionError("errors.noImages", "Choose at least one image.");
 	const archive = new JSZip(),
 		names = uniqueAvatarNames(items.map((item) => item.name)),
 		errors = [];
@@ -66,6 +67,7 @@ export async function createAvatarBatch(items, encode, progress = () => {}) {
 				id: item.id,
 				name: item.name,
 				message: error.message || "Unsupported image.",
+				translationKey: error.translationKey,
 			});
 		}
 		progress({
@@ -79,7 +81,8 @@ export async function createAvatarBatch(items, encode, progress = () => {}) {
 		await new Promise((resolve) => setTimeout(resolve, 0));
 	}
 	if (!count)
-		throw new Error(
+		throw new ConversionError(
+			"errors.noneConverted",
 			"No images could be converted. Remove damaged files and try again.",
 		);
 	const bytes = await archive.generateAsync(

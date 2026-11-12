@@ -20,7 +20,7 @@ npm run build
 
 - **Batch Processing:** Convert up to 50 images at once.
 - **100% Local Processing:** Everything happens on your device. No images are sent or uploaded to any external website, server, or third-party service.
-- **Strict Privacy:** Nothing is recorded or stored.
+- **Privacy:** Images are processed in your browser. A cookie remembers your selected language.
 - **Zero Tracking:** Does not log your IP address, email, visit counts, or any other personal data. No external analytics are used.
 
 ## Usage
@@ -32,6 +32,8 @@ npm run build
 ## Contributing
 
 Pull requests are welcome.
+
+See [Add a language](i18n/README.md) to contribute a translation.
 
 ## License
 

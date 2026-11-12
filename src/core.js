@@ -10,11 +10,23 @@ import JSZip from "jszip";
 
 export const SIZES = [440, 260, 128, 64];
 export const MAX_BYTES = 20 * 1024 * 1024;
+export class ConversionError extends Error {
+	constructor(translationKey, message) {
+		super(message);
+		this.translationKey = translationKey;
+	}
+}
 export function validateInput(bytes) {
 	if (!bytes?.length)
-		throw new Error("This file is empty. Please choose an image.");
+		throw new ConversionError(
+			"errors.empty",
+			"This file is empty. Please choose an image.",
+		);
 	if (bytes.length > MAX_BYTES)
-		throw new Error("Image is too large. Please choose a file under 20 MB.");
+		throw new ConversionError(
+			"errors.tooLarge",
+			"Image is too large. Please choose a file under 20 MB.",
+		);
 }
 export function safeName(name) {
 	return `${
@@ -41,7 +53,8 @@ export function renderPreview(bytes, fit = "stretch") {
 	validateInput(bytes);
 	return ImageMagick.read(bytes, (image) => {
 		if (image.width * image.height > 40_000_000)
-			throw new Error(
+			throw new ConversionError(
+				"errors.resolution",
 				"Image resolution exceeds 40 megapixels. Resize it first.",
 			);
 		image.autoOrient();
@@ -66,7 +79,8 @@ export async function createXavatar(
 	const zip = new JSZip();
 	ImageMagick.read(bytes, (image) => {
 		if (image.width * image.height > 40_000_000)
-			throw new Error(
+			throw new ConversionError(
+				"errors.resolution",
 				"Image resolution exceeds 40 megapixels. Resize it first.",
 			);
 		image.autoOrient();
@@ -84,7 +98,10 @@ export async function createXavatar(
 			image.write(MagickFormat.Dds, (data) => {
 				const dds = new Uint8Array(data);
 				if (new TextDecoder().decode(dds.slice(84, 88)) !== "DXT5")
-					throw new Error("DDS encoder did not produce DXT5.");
+					throw new ConversionError(
+						"errors.encoding",
+						"DDS encoder did not produce DXT5.",
+					);
 				zip.file(`avatar${size}.dds`, dds);
 				zip.file(`picture${size}.dds`, dds);
 			});
