@@ -32,6 +32,14 @@
       <span class="file-drop-selected" id="file-selected"></span>
     </button>
     <input type="file" id="file-input" multiple accept="image/*,.dds,.tga,.tif,.tiff,.heic,.avif,.psd">
+    <form id="url-form" class="url-source" novalidate>
+      <label for="image-url" data-i18n="url.label">Or use a direct image link</label>
+      <div class="url-controls">
+        <input id="image-url" type="url" dir="ltr" placeholder="https://example.com/avatar.png" aria-describedby="url-hint" autocomplete="off" spellcheck="false">
+        <button id="load-url" type="submit" data-i18n="url.load">Load image</button>
+      </div>
+      <p id="url-hint" data-i18n="url.hint">Use a direct image URL, not a webpage. The host must allow downloads from this site (CORS).</p>
+    </form>
     <div id="status" class="status" role="status" aria-live="polite" hidden></div>
     <section id="preview-section" hidden>
       <div class="section-label"><span data-i18n="preview.heading">02 / AVATAR PREVIEWS</span><span id="image-count"></span></div>
@@ -51,7 +59,7 @@
       <p id="progress-count"></p>
     </section>
     <a id="download" class="download-link" href="/" hidden>Download again</a>
-    <p class="foot-hint privacy" data-i18n="about.privacy"><svg data-i18n-slot="lock" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>100% in your browser. Your images never leave your device.</p>
+    <p class="foot-hint privacy" data-i18n="about.privacy"><svg data-i18n-slot="lock" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Conversion stays in your browser. Image links are downloaded directly from their host.</p>
     <details class="avatar-info">
       <summary data-i18n="about.format">What is a .xavatar file?</summary>
       <p data-i18n="about.formatDetails">A ZIP archive containing avatar.png, picture.png, eight DXT5 DDS images, and online.json. this page does not install avatars or modify your console.</p>
