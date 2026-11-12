@@ -1,3 +1,4 @@
+import { fetchImage } from "./remote.js";
 import { initLanguagePicker, isolate, t, translate } from "../i18n/index.js";
 import { ConversionError, MAX_BYTES, validateInput } from "./core.js";
 
@@ -43,6 +44,8 @@ function invalidateDownload() {
 function sync() {
 	const valid = cards.filter((card) => card.ready);
 	$("drop-zone").disabled = busy;
+	$("image-url").disabled = busy;
+	$("load-url").disabled = busy;
 	$("convert").disabled = busy || !valid.length;
 	$("convert-label").textContent = busy
 		? t("convert.busy")
@@ -278,6 +281,31 @@ function renderProgress() {
 		total,
 	});
 }
+$("url-form").onsubmit = async (event) => {
+	event.preventDefault();
+	if (busy) return;
+	const remaining = MAX_TOTAL - cards.reduce((sum, card) => sum + card.file.size, 0);
+	if (cards.length >= MAX_FILES || remaining <= 0) {
+		message("upload.skipped", "error", { count: 1 });
+		return;
+	}
+	busy = true;
+	sync();
+	message("url.loading");
+	let file;
+	try {
+		file = await fetchImage($("image-url").value, Math.min(MAX_BYTES, remaining));
+	} catch (error) {
+		message(error.translationKey ?? "url.failed", "error");
+	} finally {
+		busy = false;
+		sync();
+	}
+	if (file) {
+		$("image-url").value = "";
+		await selectFiles([file]);
+	}
+};
 $("drop-zone").onclick = () => {
 	$("file-input").value = "";
 	$("file-input").click();
