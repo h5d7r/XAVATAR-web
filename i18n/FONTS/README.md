@@ -5,9 +5,9 @@
 3. Before submitting a font, make sure its license permits redistribution. Include the original license and copyright notice alongside it. Add a row below with the filename, font name, source link, and license link.
 4. Run `npm run dev` and switch to the language to check the font.
 
-| File | Font | Source | License |
-| --- | --- | --- | --- |
+| File                     | Font                | Source                                                     | License                                                                                               |
+| ------------------------ | ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Loaded from Google Fonts | Bricolage Grotesque | [Atelier Triay](https://github.com/ateliertriay/bricolage) | [SIL Open Font License 1.1](https://github.com/google/fonts/blob/main/ofl/bricolagegrotesque/OFL.txt) |
-| Loaded from Google Fonts | Fira Code | [Fira Code project](https://github.com/tonsky/FiraCode) | [SIL Open Font License 1.1](https://github.com/tonsky/FiraCode/blob/master/LICENSE) |
+| Loaded from Google Fonts | Fira Code           | [Fira Code project](https://github.com/tonsky/FiraCode)    | [SIL Open Font License 1.1](https://github.com/tonsky/FiraCode/blob/master/LICENSE)                   |
 
 Arabic uses the browser's installed fallback fonts until a matching file is added here.
